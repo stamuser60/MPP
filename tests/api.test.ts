@@ -1,13 +1,13 @@
-import sinon, { SinonSandbox } from 'sinon'
+import sinon, { SinonSandbox } from 'sinon';
 import { expect } from 'chai';
 import request from 'supertest';
-import app, { API_PREFIX } from '../src/server/server';
+import app, { API_PREFIX_V1 } from '../src/server/server';
 import * as core from 'express-serve-static-core';
 import logger from '../src/logger';
 
 function postToApp(app: core.Express, path: string, data: object) {
   return request(app)
-    .post(`${API_PREFIX}${path}`)
+    .post(`${API_PREFIX_V1}${path}`)
     .send(data);
 }
 
@@ -41,7 +41,7 @@ describe('api', function() {
     it('should return 200 when enrichment type is valid, `hermeticity` or `alert`', async function() {
       const response = await postToApp(app, '/enrichments/invalidType', {});
       expect(response.status).to.be.eq(400);
-      console.log(response.body)
+      console.log(response.body);
     });
   });
 });

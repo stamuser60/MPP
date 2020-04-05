@@ -1,28 +1,25 @@
 import * as shortid from 'shortid';
 
-export class ID {
-  public id: string;
-
-  constructor() {
-    this.id = shortid.generate();
-  }
-}
-
 export interface EnrichmentProps {
   timestamp: Date;
   timestampReceived: Date;
   origin: string;
 }
 
-export class Enrichment {
-  public ID: ID;
+abstract class JSONStringifiable {
+  abstract toJSON(): { [key: string]: unknown };
+}
+
+export class Enrichment extends JSONStringifiable {
+  public ID: string;
   public timestamp: Date;
   public timestampReceived: Date;
   public origin: string;
 
   constructor(props: EnrichmentProps) {
+    super();
     this.validate(props);
-    this.ID = new ID();
+    this.ID = shortid.generate();
     this.timestamp = props.timestamp;
     this.timestampReceived = props.timestampReceived;
     this.origin = props.origin;
@@ -32,5 +29,14 @@ export class Enrichment {
     if (props.timestampReceived.getTime() < props.timestamp.getTime()) {
       throw Error(`'timestampReceived' cannot be earlier than 'timestamp' in ${JSON.stringify(props, null, 2)}`);
     }
+  }
+
+  toJSON(): { [key: string]: unknown } {
+    return {
+      ID: this.ID,
+      timestamp: this.timestamp.toISOString(),
+      timestampReceived: this.timestampReceived.toISOString(),
+      origin: this.origin
+    };
   }
 }

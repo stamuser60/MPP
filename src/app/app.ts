@@ -1,18 +1,28 @@
-import { MsgDispatcher } from '../core/msgDispatcher';
+/**
+ * Defines the use cases for the service.
+ */
+
+import { EnrichmentDispatcher } from '../core/enrichmentDispatcher';
 import { Enrichment } from '../core/enrichment';
-import { AlertDTO, DTOAlertToDomain, DTOHermeticityToDomain, EnrichmentDTO, HermeticityDTO } from './dto';
+import {
+  AlertReceived,
+  ReceivedAlertToDomain,
+  ReceivedHermeticityToDomain,
+  EnrichmentReceived,
+  HermeticityReceived
+} from './dto';
 
 export enum EnrichmentType {
   hermeticity = 'hermeticity',
   alert = 'alert'
 }
 
-function enrichmentFactory(type: EnrichmentType, enrichmentDTO: EnrichmentDTO): Enrichment {
+function enrichmentFactory(type: EnrichmentType, enrichmentDTO: EnrichmentReceived): Enrichment {
   switch (type) {
     case 'alert':
-      return DTOAlertToDomain(enrichmentDTO as AlertDTO);
+      return ReceivedAlertToDomain(enrichmentDTO as AlertReceived);
     case 'hermeticity':
-      return DTOHermeticityToDomain(enrichmentDTO as HermeticityDTO);
+      return ReceivedHermeticityToDomain(enrichmentDTO as HermeticityReceived);
     default:
       throw Error(`No constructor found for ${type}`);
   }
@@ -20,8 +30,8 @@ function enrichmentFactory(type: EnrichmentType, enrichmentDTO: EnrichmentDTO): 
 
 export async function sendEnrichment(
   type: EnrichmentType,
-  msg: EnrichmentDTO,
-  msgDispatcher: MsgDispatcher
+  msg: EnrichmentReceived,
+  msgDispatcher: EnrichmentDispatcher
 ): Promise<void> {
   const enrichment = enrichmentFactory(type, msg);
   await msgDispatcher.send(enrichment);

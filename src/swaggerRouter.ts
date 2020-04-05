@@ -10,12 +10,9 @@ const swaggerRouter = Router();
 
 const swaggerDefinition = {
   info: {
-    //TODO: replace title with project title
-    title: 'project title',
-    //TODO: replace version with project version
+    title: 'MPP',
     version: '1.0.0',
-    //TODO: replace description with project description
-    description: 'description'
+    description: 'Gateway of enrichment data into CPR'
   },
   basepath: '/'
 };

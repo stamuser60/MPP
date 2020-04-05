@@ -23,4 +23,13 @@ export class Hermeticity extends Enrichment {
     this.value = props.value;
     this.beakID = props.beakID;
   }
+
+  toJSON(): { [key: string]: unknown } {
+    return {
+      ...super.toJSON(),
+      value: this.value,
+      beakID: this.beakID,
+      status: this.status
+    };
+  }
 }

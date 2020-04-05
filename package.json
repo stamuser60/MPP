@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "**SPECIFY THIS ONE**"
+    "url": "https://github.com/stamuser60/MPP.git"
   },
   "author": "",
   "license": "ISC",
@@ -28,6 +28,7 @@
     "express": "^4.17.1",
     "husky": "^3.0.1",
     "jsonschema": "^1.2.5",
+    "kafka-node": "^5.0.0",
     "lint-staged": "^8.2.1",
     "shortid": "^2.2.15",
     "supertest": "^4.0.2",

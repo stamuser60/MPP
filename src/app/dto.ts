@@ -1,7 +1,14 @@
+/**
+ * DTO - Data Transfer Object, DTO is an object that we use to interact with
+ * different clients, in our case, its the json objects that we receive from post requests.
+ * This file holds the definitions for the DTOs that we use.
+ * This file holds the functions that translate the DTO to a `core` object (our entity).
+ */
+
 import { Alert, Severity } from '../core/alert';
 import { Hermeticity, HermeticityStatus } from '../core/hermeticity';
 
-export interface EnrichmentDTO {
+export interface EnrichmentReceived {
   /**
    * @format date-time
    */
@@ -12,7 +19,7 @@ export interface EnrichmentDTO {
   origin: string;
 }
 
-export interface HermeticityDTO extends EnrichmentDTO {
+export interface HermeticityReceived extends EnrichmentReceived {
   status: HermeticityStatus;
   /**
    * @minimum 0
@@ -25,7 +32,7 @@ export interface HermeticityDTO extends EnrichmentDTO {
   beakID: string;
 }
 
-export interface AlertDTO extends EnrichmentDTO {
+export interface AlertReceived extends EnrichmentReceived {
   /**
    * @minLength 1
    */
@@ -49,7 +56,7 @@ export interface AlertDTO extends EnrichmentDTO {
   operator: string;
 }
 
-export function DTOAlertToDomain(dto: AlertDTO): Alert {
+export function ReceivedAlertToDomain(dto: AlertReceived): Alert {
   return new Alert({
     operator: dto.operator,
     application: dto.application,
@@ -63,7 +70,7 @@ export function DTOAlertToDomain(dto: AlertDTO): Alert {
   });
 }
 
-export function DTOHermeticityToDomain(dto: HermeticityDTO): Hermeticity {
+export function ReceivedHermeticityToDomain(dto: HermeticityReceived): Hermeticity {
   return new Hermeticity({
     timestampReceived: new Date(),
     timestamp: new Date(dto.timestamp),

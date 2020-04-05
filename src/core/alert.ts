@@ -1,5 +1,13 @@
 import { Enrichment, EnrichmentProps } from './enrichment';
 
+export enum Severity {
+  normal = 'normal',
+  warning = 'warning',
+  minor = 'minor',
+  major = 'major',
+  critical = 'critical'
+}
+
 export interface AlertProps extends EnrichmentProps {
   node: string;
   severity: Severity;
@@ -7,14 +15,6 @@ export interface AlertProps extends EnrichmentProps {
   object: string;
   application: string;
   operator: string;
-}
-
-export enum Severity {
-  NORMAL = 'normal',
-  WARNING = 'warning',
-  MINOR = 'minor',
-  MAJOR = 'major',
-  CRITICAL = 'critical'
 }
 
 export class Alert extends Enrichment {
@@ -33,5 +33,17 @@ export class Alert extends Enrichment {
     this.object = props.object;
     this.application = props.application;
     this.operator = props.operator;
+  }
+
+  toJSON(): { [key: string]: unknown } {
+    return {
+      ...super.toJSON(),
+      node: this.node,
+      severity: this.severity,
+      description: this.description,
+      object: this.object,
+      application: this.application,
+      operator: this.operator
+    };
   }
 }
