@@ -65,7 +65,7 @@ export function ReceivedAlertToDomain(dto: AlertReceived): Alert {
     severity: dto.severity,
     node: dto.node,
     origin: dto.origin,
-    timestamp: new Date(dto.timestamp),
+    timestampCreated: new Date(dto.timestamp),
     timestampReceived: new Date()
   });
 }
@@ -73,7 +73,7 @@ export function ReceivedAlertToDomain(dto: AlertReceived): Alert {
 export function ReceivedHermeticityToDomain(dto: HermeticityReceived): Hermeticity {
   return new Hermeticity({
     timestampReceived: new Date(),
-    timestamp: new Date(dto.timestamp),
+    timestampCreated: new Date(dto.timestamp),
     origin: dto.origin,
     beakID: dto.beakID,
     status: dto.status,

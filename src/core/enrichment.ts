@@ -1,7 +1,7 @@
 import * as shortid from 'shortid';
 
 export interface EnrichmentProps {
-  timestamp: Date;
+  timestampCreated: Date;
   timestampReceived: Date;
   origin: string;
 }
@@ -20,13 +20,13 @@ export class Enrichment extends JSONStringifiable {
     super();
     this.validate(props);
     this.ID = shortid.generate();
-    this.timestamp = props.timestamp;
+    this.timestamp = props.timestampCreated;
     this.timestampReceived = props.timestampReceived;
     this.origin = props.origin;
   }
 
   private validate(props: EnrichmentProps): void {
-    if (props.timestampReceived.getTime() < props.timestamp.getTime()) {
+    if (props.timestampReceived.getTime() < props.timestampCreated.getTime()) {
       throw Error(`'timestampReceived' cannot be earlier than 'timestamp' in ${JSON.stringify(props, null, 2)}`);
     }
   }

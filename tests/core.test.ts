@@ -8,19 +8,19 @@ describe('Core', function() {
       const timestamp = new Date('2020-03-25T12:24:23.319Z');
       const enrichmentProps: EnrichmentProps = {
         origin: 'asd',
-        timestamp: timestamp,
+        timestampCreated: timestamp,
         timestampReceived: timestampReceived
       };
       const enrichment1 = new Enrichment(enrichmentProps);
       const enrichment2 = new Enrichment(enrichmentProps);
-      expect(enrichment1.ID.id === enrichment2.ID.id).to.be.false;
+      expect(enrichment1.ID === enrichment2.ID).to.eq(false);
     });
     it('should create object if props are fine', function() {
       const timestampReceived = new Date('2020-03-26T12:24:23.319Z');
       const timestamp = new Date('2020-03-25T12:24:23.319Z');
       const enrichmentProps: EnrichmentProps = {
         origin: 'asd',
-        timestamp: timestamp,
+        timestampCreated: timestamp,
         timestampReceived: timestampReceived
       };
       new Enrichment(enrichmentProps);
@@ -30,7 +30,7 @@ describe('Core', function() {
       const timestamp = new Date('2020-03-26T12:24:23.319Z');
       const enrichmentProps: EnrichmentProps = {
         origin: 'asd',
-        timestamp: timestamp,
+        timestampCreated: timestamp,
         timestampReceived: timestampReceived
       };
       try {
