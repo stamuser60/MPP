@@ -25,7 +25,7 @@ describe('Core', function() {
       };
       new Enrichment(enrichmentProps);
     });
-    it('should throw exception when timestamp is older than timestampReceived', function(done) {
+    it('should throw exception when timestampCreated is older than timestampReceived', function(done) {
       const timestampReceived = new Date('2020-03-25T12:24:23.319Z');
       const timestamp = new Date('2020-03-26T12:24:23.319Z');
       const enrichmentProps: EnrichmentProps = {
@@ -35,7 +35,7 @@ describe('Core', function() {
       };
       try {
         new Enrichment(enrichmentProps);
-        done('No error thrown for older `timestampReceived` than `timestamp`');
+        done('No error thrown for older `timestampReceived` than `timestampCreated`');
       } catch (e) {
         done();
       }

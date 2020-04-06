@@ -1,4 +1,4 @@
-import { Enrichment, EnrichmentProps } from './enrichment';
+import { Enrichment, EnrichmentProps, EnrichmentType } from './enrichment';
 
 export enum HermeticityStatus {
   normal = 'normal',
@@ -18,7 +18,7 @@ export class Hermeticity extends Enrichment {
   public status: HermeticityStatus;
 
   constructor(props: HermeticityProps) {
-    super(props);
+    super(props, EnrichmentType.hermeticity);
     this.status = props.status;
     this.value = props.value;
     this.beakID = props.beakID;

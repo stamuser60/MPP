@@ -1,6 +1,6 @@
 import { alertSchema, hermeticitySchema } from '../infrastructure/schemaGenerator';
 import { Definition } from 'typescript-json-schema';
-import { EnrichmentType } from '../app/app';
+import { EnrichmentType } from '../core/enrichment';
 import { Schema, Validator } from 'jsonschema';
 
 export const TypeToValidation: { [key in EnrichmentType]: Definition } = {

@@ -1,4 +1,4 @@
-import { Enrichment, EnrichmentProps } from './enrichment';
+import { Enrichment, EnrichmentProps, EnrichmentType } from './enrichment';
 
 export enum Severity {
   normal = 'normal',
@@ -26,7 +26,7 @@ export class Alert extends Enrichment {
   public operator: string;
 
   constructor(props: AlertProps) {
-    super(props);
+    super(props, EnrichmentType.alert);
     this.node = props.node;
     this.severity = props.severity;
     this.description = props.description;

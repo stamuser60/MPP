@@ -1,8 +1,9 @@
 import { Message } from 'kafka-node';
 import { validateEnrichment } from './validation';
-import { EnrichmentType, sendEnrichment } from '../app/app';
+import { sendEnrichment } from '../app/app';
 import { EnrichmentReceived } from '../app/dto';
 import { enrichmentConsumer, enrichmentDispatcher } from '../compositionRoot';
+import { EnrichmentType } from '../core/enrichment';
 import logger from '../logger';
 
 //TODO: the two calls to `logger.error` basically log the same data, but in different way, decide which was is the best

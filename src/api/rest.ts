@@ -4,10 +4,11 @@
 
 import { Router } from 'express';
 import { validateEnrichment, validateEnrichmentType } from './validation';
-import { EnrichmentType, sendEnrichment } from '../app/app';
+import { sendEnrichment } from '../app/app';
 import logger from '../logger';
 import { EnrichmentReceived } from '../app/dto';
 import { enrichmentDispatcher } from '../compositionRoot';
+import { EnrichmentType } from '../core/enrichment';
 
 const router = Router();
 

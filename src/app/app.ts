@@ -3,7 +3,7 @@
  */
 
 import { EnrichmentDispatcher } from '../core/enrichmentDispatcher';
-import { Enrichment } from '../core/enrichment';
+import { Enrichment, EnrichmentType } from '../core/enrichment';
 import {
   AlertReceived,
   ReceivedAlertToDomain,
@@ -11,11 +11,6 @@ import {
   EnrichmentReceived,
   HermeticityReceived
 } from './dto';
-
-export enum EnrichmentType {
-  hermeticity = 'hermeticity',
-  alert = 'alert'
-}
 
 function enrichmentFactory(type: EnrichmentType, enrichmentDTO: EnrichmentReceived): Enrichment {
   switch (type) {

@@ -1,5 +1,10 @@
 import * as shortid from 'shortid';
 
+export enum EnrichmentType {
+  hermeticity = 'hermeticity',
+  alert = 'alert'
+}
+
 export interface EnrichmentProps {
   timestampCreated: Date;
   timestampReceived: Date;
@@ -12,15 +17,17 @@ abstract class JSONStringifiable {
 
 export class Enrichment extends JSONStringifiable {
   public ID: string;
-  public timestamp: Date;
+  public timestampCreated: Date;
   public timestampReceived: Date;
   public origin: string;
+  public type: keyof typeof EnrichmentType;
 
-  constructor(props: EnrichmentProps) {
+  constructor(props: EnrichmentProps, type: keyof typeof EnrichmentType) {
     super();
     this.validate(props);
+    this.type = type;
     this.ID = shortid.generate();
-    this.timestamp = props.timestampCreated;
+    this.timestampCreated = props.timestampCreated;
     this.timestampReceived = props.timestampReceived;
     this.origin = props.origin;
   }
@@ -33,8 +40,9 @@ export class Enrichment extends JSONStringifiable {
 
   toJSON(): { [key: string]: unknown } {
     return {
+      type: this.type,
       ID: this.ID,
-      timestamp: this.timestamp.toISOString(),
+      timestampCreated: this.timestampCreated.toISOString(),
       timestampReceived: this.timestampReceived.toISOString(),
       origin: this.origin
     };
