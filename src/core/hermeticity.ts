@@ -1,35 +1,33 @@
-import { Enrichment, EnrichmentProps, EnrichmentType } from './enrichment';
+import { createEnrichmentOutput, EnrichmentOutput, EnrichmentOutputProps, EnrichmentType } from './enrichment';
 
 export enum HermeticityStatus {
-  normal = 'normal',
-  minor = 'minor',
-  critical = 'critical'
+  normal = 1,
+  minor = 2,
+  critical = 3
 }
 
-export interface HermeticityProps extends EnrichmentProps {
+export interface HermeticityOutput extends EnrichmentOutput {
   value: number;
   beakID: string;
-  status: HermeticityStatus;
+  status: keyof typeof HermeticityStatus;
+  hasAlert: boolean;
+  type: EnrichmentType.hermeticity;
 }
 
-export class Hermeticity extends Enrichment {
-  public value: number;
-  public beakID: string;
-  public status: HermeticityStatus;
+export interface HermeticityOutputProps extends EnrichmentOutputProps {
+  value: number;
+  beakID: string;
+  status: keyof typeof HermeticityStatus;
+  hasAlert: boolean;
+}
 
-  constructor(props: HermeticityProps) {
-    super(props, EnrichmentType.hermeticity);
-    this.status = props.status;
-    this.value = props.value;
-    this.beakID = props.beakID;
-  }
-
-  toJSON(): { [key: string]: unknown } {
-    return {
-      ...super.toJSON(),
-      value: this.value,
-      beakID: this.beakID,
-      status: this.status
-    };
-  }
+export function createHermeticityOutput(props: HermeticityOutputProps): HermeticityOutput {
+  return {
+    ...createEnrichmentOutput(props, EnrichmentType.hermeticity),
+    value: props.value,
+    beakID: props.beakID,
+    status: props.status,
+    hasAlert: props.hasAlert,
+    type: EnrichmentType.hermeticity
+  };
 }

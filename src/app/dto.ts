@@ -5,8 +5,13 @@
  * This file holds the functions that translate the DTO to a `core` object (our entity).
  */
 
-import { Alert, Severity } from '../core/alert';
-import { Hermeticity, HermeticityStatus } from '../core/hermeticity';
+import { AlertOutput, AlertOutputProps, createAlertOutput, Severity } from '../core/alert';
+import {
+  createHermeticityOutput,
+  HermeticityOutput,
+  HermeticityOutputProps,
+  HermeticityStatus
+} from '../core/hermeticity';
 
 export interface EnrichmentReceived {
   /**
@@ -30,6 +35,7 @@ export interface HermeticityReceived extends EnrichmentReceived {
    * @minLength 1
    */
   beakID: string;
+  hasAlert: boolean;
 }
 
 export interface AlertReceived extends EnrichmentReceived {
@@ -56,27 +62,19 @@ export interface AlertReceived extends EnrichmentReceived {
   operator: string;
 }
 
-export function ReceivedAlertToDomain(dto: AlertReceived): Alert {
-  return new Alert({
-    operator: dto.operator,
-    application: dto.application,
-    object: dto.object,
-    description: dto.description,
-    severity: dto.severity,
-    node: dto.node,
-    origin: dto.origin,
-    timestampCreated: new Date(dto.timestamp),
-    timestampReceived: new Date()
-  });
+export function ReceivedAlertToDomain(dto: AlertReceived): AlertOutput {
+  const props: AlertOutputProps = {
+    ...dto,
+    timestampCreated: dto.timestamp
+  };
+  return createAlertOutput(props);
 }
 
-export function ReceivedHermeticityToDomain(dto: HermeticityReceived): Hermeticity {
-  return new Hermeticity({
-    timestampReceived: new Date(),
-    timestampCreated: new Date(dto.timestamp),
-    origin: dto.origin,
-    beakID: dto.beakID,
-    status: dto.status,
-    value: dto.value
-  });
+export function ReceivedHermeticityToDomain(dto: HermeticityReceived): HermeticityOutput {
+  const props: HermeticityOutputProps = {
+    ...dto,
+    status: HermeticityStatus[dto.status] as keyof typeof HermeticityStatus,
+    timestampCreated: dto.timestamp
+  };
+  return createHermeticityOutput(props);
 }

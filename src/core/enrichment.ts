@@ -1,50 +1,38 @@
-import * as shortid from 'shortid';
+import shortid = require('shortid');
 
 export enum EnrichmentType {
   hermeticity = 'hermeticity',
   alert = 'alert'
 }
 
-export interface EnrichmentProps {
+export interface EnrichmentOutput {
   timestampCreated: Date;
   timestampReceived: Date;
   origin: string;
+  ID: string;
+  type: EnrichmentType;
 }
 
-abstract class JSONStringifiable {
-  abstract toJSON(): { [key: string]: unknown };
+export interface EnrichmentOutputProps {
+  timestampCreated: string;
+  origin: string;
 }
 
-export class Enrichment extends JSONStringifiable {
-  public ID: string;
-  public timestampCreated: Date;
-  public timestampReceived: Date;
-  public origin: string;
-  public type: keyof typeof EnrichmentType;
-
-  constructor(props: EnrichmentProps, type: keyof typeof EnrichmentType) {
-    super();
-    this.validate(props);
-    this.type = type;
-    this.ID = shortid.generate();
-    this.timestampCreated = props.timestampCreated;
-    this.timestampReceived = props.timestampReceived;
-    this.origin = props.origin;
+function validate(tsCreated: Date, tsReceived: Date): void {
+  if (tsReceived < tsCreated) {
+    throw Error(`'timestampReceived' cannot be earlier than 'timestamp'`);
   }
+}
 
-  private validate(props: EnrichmentProps): void {
-    if (props.timestampReceived.getTime() < props.timestampCreated.getTime()) {
-      throw Error(`'timestampReceived' cannot be earlier than 'timestamp' in ${JSON.stringify(props, null, 2)}`);
-    }
-  }
-
-  toJSON(): { [key: string]: unknown } {
-    return {
-      type: this.type,
-      ID: this.ID,
-      timestampCreated: this.timestampCreated.toISOString(),
-      timestampReceived: this.timestampReceived.toISOString(),
-      origin: this.origin
-    };
-  }
+export function createEnrichmentOutput(props: EnrichmentOutputProps, type: EnrichmentType): EnrichmentOutput {
+  const timestampReceived = new Date();
+  const timestampCreated = new Date(props.timestampCreated);
+  validate(timestampCreated, timestampReceived);
+  return {
+    ID: shortid.generate(),
+    origin: props.origin,
+    timestampCreated: timestampCreated,
+    timestampReceived: timestampReceived,
+    type: type
+  };
 }

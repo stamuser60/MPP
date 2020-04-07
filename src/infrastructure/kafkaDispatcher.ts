@@ -1,6 +1,6 @@
 import kafka from 'kafka-node';
 import { EnrichmentDispatcher } from '../core/enrichmentDispatcher';
-import { Enrichment } from '../core/enrichment';
+import { EnrichmentOutput } from '../core/enrichment';
 
 export class KafkaEnrichmentDispatcher implements EnrichmentDispatcher {
   private producer: kafka.Producer;
@@ -10,13 +10,13 @@ export class KafkaEnrichmentDispatcher implements EnrichmentDispatcher {
     this.topic = topic;
   }
 
-  async send(enrichment: Enrichment): Promise<void> {
+  async send(enrichment: EnrichmentOutput): Promise<void> {
     return new Promise((resolve, reject) => {
       this.producer.send(
         [
           {
             topic: this.topic,
-            messages: JSON.stringify(enrichment.toJSON())
+            messages: JSON.stringify(enrichment)
           }
         ],
         function(err, data) {

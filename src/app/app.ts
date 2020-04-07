@@ -3,7 +3,7 @@
  */
 
 import { EnrichmentDispatcher } from '../core/enrichmentDispatcher';
-import { Enrichment, EnrichmentType } from '../core/enrichment';
+import { EnrichmentOutput, EnrichmentType } from '../core/enrichment';
 import {
   AlertReceived,
   ReceivedAlertToDomain,
@@ -12,7 +12,7 @@ import {
   HermeticityReceived
 } from './dto';
 
-function enrichmentFactory(type: EnrichmentType, enrichmentDTO: EnrichmentReceived): Enrichment {
+function enrichmentFactory(type: EnrichmentType, enrichmentDTO: EnrichmentReceived): EnrichmentOutput {
   switch (type) {
     case 'alert':
       return ReceivedAlertToDomain(enrichmentDTO as AlertReceived);

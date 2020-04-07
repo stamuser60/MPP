@@ -1,5 +1,5 @@
-import { Enrichment } from './enrichment';
+import { EnrichmentOutput } from './enrichment';
 
 export interface EnrichmentDispatcher {
-  send(enrichment: Enrichment): Promise<void>;
+  send(enrichment: EnrichmentOutput): Promise<void>;
 }

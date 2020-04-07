@@ -1,4 +1,4 @@
-import { Enrichment, EnrichmentProps, EnrichmentType } from './enrichment';
+import { createEnrichmentOutput, EnrichmentOutput, EnrichmentOutputProps, EnrichmentType } from './enrichment';
 
 export enum Severity {
   normal = 'normal',
@@ -8,7 +8,7 @@ export enum Severity {
   critical = 'critical'
 }
 
-export interface AlertProps extends EnrichmentProps {
+export interface AlertOutput extends EnrichmentOutput {
   node: string;
   severity: Severity;
   description: string;
@@ -17,33 +17,23 @@ export interface AlertProps extends EnrichmentProps {
   operator: string;
 }
 
-export class Alert extends Enrichment {
-  public node: string;
-  public severity: Severity;
-  public description: string;
-  public object: string;
-  public application: string;
-  public operator: string;
+export interface AlertOutputProps extends EnrichmentOutputProps {
+  node: string;
+  severity: Severity;
+  description: string;
+  object: string;
+  application: string;
+  operator: string;
+}
 
-  constructor(props: AlertProps) {
-    super(props, EnrichmentType.alert);
-    this.node = props.node;
-    this.severity = props.severity;
-    this.description = props.description;
-    this.object = props.object;
-    this.application = props.application;
-    this.operator = props.operator;
-  }
-
-  toJSON(): { [key: string]: unknown } {
-    return {
-      ...super.toJSON(),
-      node: this.node,
-      severity: this.severity,
-      description: this.description,
-      object: this.object,
-      application: this.application,
-      operator: this.operator
-    };
-  }
+export function createAlertOutput(props: AlertOutputProps): AlertOutput {
+  return {
+    ...createEnrichmentOutput(props, EnrichmentType.alert),
+    node: props.node,
+    severity: props.severity,
+    description: props.description,
+    object: props.object,
+    application: props.application,
+    operator: props.operator
+  };
 }
