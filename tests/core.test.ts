@@ -1,40 +1,34 @@
-import { Enrichment, EnrichmentProps } from '../src/core/enrichment';
+import { createEnrichmentOutput, EnrichmentOutputProps, EnrichmentType } from '../src/core/enrichment';
 import { expect } from 'chai';
 
 describe('Core', function() {
   describe('Enrichment', function() {
     it("should create enrichment with different ID'", function() {
-      const timestampReceived = new Date('2020-03-26T12:24:23.319Z');
-      const timestamp = new Date('2020-03-25T12:24:23.319Z');
-      const enrichmentProps: EnrichmentProps = {
+      const timestamp = '2020-03-25T12:24:23.319Z';
+      const enrichmentProps: EnrichmentOutputProps = {
         origin: 'asd',
-        timestampCreated: timestamp,
-        timestampReceived: timestampReceived
+        timestampCreated: timestamp
       };
-      const enrichment1 = new Enrichment(enrichmentProps);
-      const enrichment2 = new Enrichment(enrichmentProps);
+      const enrichment1 = createEnrichmentOutput(enrichmentProps, EnrichmentType.alert);
+      const enrichment2 = createEnrichmentOutput(enrichmentProps, EnrichmentType.alert);
       expect(enrichment1.ID === enrichment2.ID).to.eq(false);
     });
     it('should create object if props are fine', function() {
-      const timestampReceived = new Date('2020-03-26T12:24:23.319Z');
-      const timestamp = new Date('2020-03-25T12:24:23.319Z');
-      const enrichmentProps: EnrichmentProps = {
+      const timestamp = '2020-03-25T12:24:23.319Z';
+      const enrichmentProps: EnrichmentOutputProps = {
         origin: 'asd',
-        timestampCreated: timestamp,
-        timestampReceived: timestampReceived
+        timestampCreated: timestamp
       };
-      new Enrichment(enrichmentProps);
+      createEnrichmentOutput(enrichmentProps, EnrichmentType.alert);
     });
     it('should throw exception when timestampCreated is older than timestampReceived', function(done) {
-      const timestampReceived = new Date('2020-03-25T12:24:23.319Z');
-      const timestamp = new Date('2020-03-26T12:24:23.319Z');
-      const enrichmentProps: EnrichmentProps = {
+      const timestamp = '2099-03-26T12:24:23.319Z';
+      const enrichmentProps: EnrichmentOutputProps = {
         origin: 'asd',
-        timestampCreated: timestamp,
-        timestampReceived: timestampReceived
+        timestampCreated: timestamp
       };
       try {
-        new Enrichment(enrichmentProps);
+        createEnrichmentOutput(enrichmentProps, EnrichmentType.alert);
         done('No error thrown for older `timestampReceived` than `timestampCreated`');
       } catch (e) {
         done();

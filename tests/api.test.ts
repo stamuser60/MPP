@@ -1,3 +1,4 @@
+require('dotenv/config');
 import sinon, { SinonSandbox } from 'sinon';
 import { expect } from 'chai';
 import request from 'supertest';
@@ -36,12 +37,10 @@ describe('api', function() {
     it('should return 400 when enrichment type is invalid', async function() {
       const response = await postToApp(app, '/enrichments/invalidType', {});
       expect(response.status).to.be.eq(400);
-      console.log(response.status);
     });
     it('should return 200 when enrichment type is valid, `hermeticity` or `alert`', async function() {
       const response = await postToApp(app, '/enrichments/invalidType', {});
       expect(response.status).to.be.eq(400);
-      console.log(response.body);
     });
   });
 });

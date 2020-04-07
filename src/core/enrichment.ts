@@ -7,7 +7,6 @@ export enum EnrichmentType {
 
 export interface EnrichmentOutput {
   timestampCreated: Date;
-  timestampReceived: Date;
   origin: string;
   ID: string;
   type: EnrichmentType;
@@ -20,7 +19,9 @@ export interface EnrichmentOutputProps {
 
 function validate(tsCreated: Date, tsReceived: Date): void {
   if (tsReceived < tsCreated) {
-    throw Error(`'timestampReceived' cannot be earlier than 'timestamp'`);
+    throw Error(
+      `'timestampCreated' cannot be future, got ${tsCreated} as 'timestampCreated' while ${tsCreated} is the current time`
+    );
   }
 }
 
@@ -32,7 +33,6 @@ export function createEnrichmentOutput(props: EnrichmentOutputProps, type: Enric
     ID: shortid.generate(),
     origin: props.origin,
     timestampCreated: timestampCreated,
-    timestampReceived: timestampReceived,
     type: type
   };
 }
