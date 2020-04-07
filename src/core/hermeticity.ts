@@ -11,7 +11,6 @@ export interface HermeticityOutput extends EnrichmentOutput {
   beakID: string;
   status: keyof typeof HermeticityStatus;
   hasAlert: boolean;
-  type: EnrichmentType.hermeticity;
 }
 
 export interface HermeticityOutputProps extends EnrichmentOutputProps {
@@ -27,7 +26,6 @@ export function createHermeticityOutput(props: HermeticityOutputProps): Hermetic
     value: props.value,
     beakID: props.beakID,
     status: props.status,
-    hasAlert: props.hasAlert,
-    type: EnrichmentType.hermeticity
+    hasAlert: props.hasAlert
   };
 }
