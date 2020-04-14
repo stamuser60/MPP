@@ -1,22 +1,25 @@
 import { alertSchema, hermeticitySchema } from '../infrastructure/schemaGenerator';
-import { Definition } from 'typescript-json-schema';
-import { EnrichmentType } from '../core/enrichment';
 import { Schema, Validator } from 'jsonschema';
+import { TypeReceivedName, TypeToEnrichmentReceived } from '../app/dto';
+import { hermeticityTypeName } from '../core/hermeticity';
+import { alertTypeName } from '../core/alert';
 
-export const TypeToValidation: { [key in EnrichmentType]: Definition } = {
-  hermeticity: hermeticitySchema as Definition,
-  alert: alertSchema as Definition
+export const TypeToSchema: { [key in TypeReceivedName]: Schema } = {
+  [hermeticityTypeName]: hermeticitySchema as Schema,
+  [alertTypeName]: alertSchema as Schema
 };
 
-export function validateEnrichmentType(type: string): void {
-  if (!Object.keys(TypeToValidation).some(value => value === type)) {
-    throw Error(`Enrichment type ${type} was not found, options are: ${Object.keys(TypeToValidation).join(', ')}`);
+export function validateEnrichmentType(type: string): TypeReceivedName {
+  if (!Object.keys(TypeToSchema).some(value => value === type)) {
+    throw Error(`Enrichment type ${type} was not found, options are: ${Object.keys(TypeToSchema).join(', ')}`);
   }
+  return type as TypeReceivedName;
 }
 
-export function validateEnrichment(type: EnrichmentType, msg: object): void {
+export function validateEnrichment<T extends TypeReceivedName>(type: T, msg: unknown): TypeToEnrichmentReceived[T] {
   const newNodeValidator = new Validator();
   const jsonSchemaOptions = { throwError: true };
-  const schema = TypeToValidation[type as EnrichmentType];
-  newNodeValidator.validate(msg, schema as Schema, jsonSchemaOptions);
+  const schema = TypeToSchema[type];
+  newNodeValidator.validate(msg, schema, jsonSchemaOptions);
+  return msg as TypeToEnrichmentReceived[T];
 }

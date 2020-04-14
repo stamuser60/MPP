@@ -1,28 +1,25 @@
 import { Message } from 'kafka-node';
 import { validateEnrichment } from './validation';
 import { sendEnrichment } from '../app/app';
-import { EnrichmentReceived } from '../app/dto';
 import { enrichmentConsumer, enrichmentDispatcher } from '../compositionRoot';
-import { EnrichmentType } from '../core/enrichment';
 import logger from '../logger';
+import { hermeticityTypeName } from '../core/hermeticity';
 
-//TODO: the two calls to `logger.error` basically log the same data, but in different way, decide which was is the best
+// TODO: decide on how to act when there is a problematic message, do we just throw it all to DLQ or something else?
 
 async function onMessage(message: Message): Promise<void> {
   try {
     const messageObj = JSON.parse(message.value.toString());
-    validateEnrichment(EnrichmentType.hermeticity, messageObj);
-    await sendEnrichment(EnrichmentType.hermeticity, messageObj as EnrichmentReceived, enrichmentDispatcher);
+    const enrichment = validateEnrichment(hermeticityTypeName, messageObj);
+    await sendEnrichment(hermeticityTypeName, enrichment, enrichmentDispatcher);
   } catch (e) {
-    logger.error(`while processing message from unity's kafka: ${e.message} \n ${e.stack}`);
+    logger.error(`while processing message from unity's kafka \n ${e.stack}`);
+    throw e;
   }
 }
 
 function onError(error: Error): void {
-  logger.error({
-    message: 'Error while consuming enrichments: ' + error.message,
-    stack: error.stack
-  });
+  logger.error(`Error while consuming enrichments \n ${error.stack}`);
 }
 
 export function startConsumingAlerts(): void {

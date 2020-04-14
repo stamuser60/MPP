@@ -1,4 +1,4 @@
-import { createEnrichmentOutput, EnrichmentOutputProps, EnrichmentType } from '../src/core/enrichment';
+import { createEnrichmentOutput, EnrichmentOutputProps } from '../src/core/enrichment';
 import { expect } from 'chai';
 
 describe('Core', function() {
@@ -9,8 +9,8 @@ describe('Core', function() {
         origin: 'asd',
         timestampCreated: timestamp
       };
-      const enrichment1 = createEnrichmentOutput(enrichmentProps, EnrichmentType.alert);
-      const enrichment2 = createEnrichmentOutput(enrichmentProps, EnrichmentType.alert);
+      const enrichment1 = createEnrichmentOutput(enrichmentProps, 'alert');
+      const enrichment2 = createEnrichmentOutput(enrichmentProps, 'alert');
       expect(enrichment1.ID === enrichment2.ID).to.eq(false);
     });
     it('should create object if props are fine', function() {
@@ -19,7 +19,7 @@ describe('Core', function() {
         origin: 'asd',
         timestampCreated: timestamp
       };
-      createEnrichmentOutput(enrichmentProps, EnrichmentType.alert);
+      createEnrichmentOutput(enrichmentProps, 'alert');
     });
     it('should throw exception when timestampCreated is older than timestampReceived', function(done) {
       const timestamp = '2099-03-26T12:24:23.319Z';
@@ -28,7 +28,7 @@ describe('Core', function() {
         timestampCreated: timestamp
       };
       try {
-        createEnrichmentOutput(enrichmentProps, EnrichmentType.alert);
+        createEnrichmentOutput(enrichmentProps, 'alert');
         done('No error thrown for older `timestampReceived` than `timestampCreated`');
       } catch (e) {
         done();

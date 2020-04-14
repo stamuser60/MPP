@@ -9,6 +9,7 @@ import { Router } from 'express';
 const swaggerRouter = Router();
 
 const swaggerDefinition = {
+  openapi: '3.0.0',
   info: {
     title: 'MPP',
     version: '1.0.0',

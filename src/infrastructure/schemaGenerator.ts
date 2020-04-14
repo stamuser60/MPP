@@ -10,12 +10,19 @@ function modifySchema(schema: Definition): void {
   schema.additionalProperties = false;
 }
 
-const program = TJS.getProgramFromFiles([
-  resolve('src/core/alert.ts'),
-  resolve('src/core/enrichment.ts'),
-  resolve('src/core/hermeticity.ts'),
-  resolve('src/app/dto.ts')
-]);
+const compilerOptions: TJS.CompilerOptions = {
+  esModuleInterop: true
+};
+
+const program = TJS.getProgramFromFiles(
+  [
+    resolve('src/core/alert.ts'),
+    resolve('src/core/enrichment.ts'),
+    resolve('src/core/hermeticity.ts'),
+    resolve('src/app/dto.ts')
+  ],
+  compilerOptions
+);
 
 const generateArgs: PartialArgs = {
   required: true

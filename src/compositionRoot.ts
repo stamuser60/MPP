@@ -1,6 +1,11 @@
 import { KafkaEnrichmentDispatcher } from './infrastructure/kafkaDispatcher';
 import { EnrichmentDispatcher } from './core/enrichmentDispatcher';
-import kafka, { ConsumerGroup, ConsumerGroupOptions, KafkaClientOptions, ProducerOptions } from 'kafka-node';
+import kafka, {
+  ConsumerGroupStream,
+  ConsumerGroupStreamOptions,
+  KafkaClientOptions,
+  ProducerOptions
+} from 'kafka-node';
 import { CPR_KAFKA_CONN, UNITY_KAFKA_CONN, UNITY_KAFKA_TOPIC, CPR_KAFKA_TOPIC, UNITY_KAFKA_GROUP_ID } from './config';
 import { KafkaEnrichmentConsumer } from './infrastructure/kafkaConsumer';
 import logger from './logger';
@@ -15,7 +20,7 @@ const producerOptions: ProducerOptions = {
   partitionerType: 2 // This is so that the producer will send the messages in roundrobin style
 };
 
-const options: ConsumerGroupOptions = {
+const options: ConsumerGroupStreamOptions = {
   kafkaHost: UNITY_KAFKA_CONN,
   groupId: UNITY_KAFKA_GROUP_ID,
   sessionTimeout: 15000,
@@ -23,17 +28,21 @@ const options: ConsumerGroupOptions = {
   encoding: 'utf8',
   fromOffset: 'latest',
   outOfRangeOffset: 'earliest',
-  autoCommit: true,
-  autoCommitIntervalMs: 3000
+  fetchMaxBytes: 1024 * 1024,
+  fetchMaxWaitMs: 3000,
+  batch: { noAckBatchSize: 20, noAckBatchAge: 3000 },
+  // autoCommit is false so we can manage the commits by ourselves
+  autoCommit: false
 };
 
 const cprClient = new kafka.KafkaClient(cprClientOptions);
 const cprKafkaProducer = new kafka.Producer(cprClient, producerOptions);
 
-const unityKafkaConsumerGroup = new ConsumerGroup(options, UNITY_KAFKA_TOPIC);
+const unityKafkaConsumerGroup = new ConsumerGroupStream(options, UNITY_KAFKA_TOPIC);
 
 const enrichmentDispatcher: EnrichmentDispatcher = new KafkaEnrichmentDispatcher(cprKafkaProducer, CPR_KAFKA_TOPIC);
-const enrichmentConsumer = new KafkaEnrichmentConsumer(unityKafkaConsumerGroup);
+const dlqDispatcher: EnrichmentDispatcher = new KafkaEnrichmentDispatcher(cprKafkaProducer, CPR_KAFKA_TOPIC);
+const enrichmentConsumer = new KafkaEnrichmentConsumer(unityKafkaConsumerGroup, dlqDispatcher);
 
 cprKafkaProducer.on('error', function(error) {
   logger.error(`MPP kafka producer error: ${error}`);

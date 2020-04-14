@@ -1,4 +1,4 @@
-import { createEnrichmentOutput, EnrichmentOutput, EnrichmentOutputProps, EnrichmentType } from './enrichment';
+import { createEnrichmentOutput, EnrichmentOutput, EnrichmentOutputProps } from './enrichment';
 
 export enum HermeticityStatus {
   normal = 1,
@@ -6,7 +6,8 @@ export enum HermeticityStatus {
   critical = 3
 }
 
-export interface HermeticityOutput extends EnrichmentOutput {
+export const hermeticityTypeName = 'hermeticity';
+export interface HermeticityOutput extends EnrichmentOutput<typeof hermeticityTypeName> {
   value: number;
   beakID: string;
   status: keyof typeof HermeticityStatus;
@@ -22,7 +23,7 @@ export interface HermeticityOutputProps extends EnrichmentOutputProps {
 
 export function createHermeticityOutput(props: HermeticityOutputProps): HermeticityOutput {
   return {
-    ...createEnrichmentOutput(props, EnrichmentType.hermeticity),
+    ...createEnrichmentOutput(props, hermeticityTypeName),
     value: props.value,
     beakID: props.beakID,
     status: props.status,

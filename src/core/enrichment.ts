@@ -1,15 +1,10 @@
-import shortid = require('shortid');
+import md5 from 'md5';
 
-export enum EnrichmentType {
-  hermeticity = 'hermeticity',
-  alert = 'alert'
-}
-
-export interface EnrichmentOutput {
+export interface EnrichmentOutput<T extends string> {
   timestampCreated: Date;
   origin: string;
   ID: string;
-  type: EnrichmentType;
+  type: T;
 }
 
 export interface EnrichmentOutputProps {
@@ -25,12 +20,22 @@ function validate(tsCreated: Date, tsReceived: Date): void {
   }
 }
 
-export function createEnrichmentOutput(props: EnrichmentOutputProps, type: EnrichmentType): EnrichmentOutput {
+/**
+ * A function that generates a unique hash based on json passed.
+ * @param uniqueData: The data we use to generate the MD5 hash.
+ *                    Another place where we have to use `any` because the typescript compiler
+ *                    is not able to tell that we are passing sufficient data.
+ */
+function generateMD5UniqueID(uniqueData: { [key: string]: any }): string {
+  return md5(JSON.stringify(uniqueData));
+}
+
+export function createEnrichmentOutput<T extends string>(props: EnrichmentOutputProps, type: T): EnrichmentOutput<T> {
   const timestampReceived = new Date();
   const timestampCreated = new Date(props.timestampCreated);
   validate(timestampCreated, timestampReceived);
   return {
-    ID: shortid.generate(),
+    ID: generateMD5UniqueID(props),
     origin: props.origin,
     timestampCreated: timestampCreated,
     type: type

@@ -1,4 +1,4 @@
-import { createEnrichmentOutput, EnrichmentOutput, EnrichmentOutputProps, EnrichmentType } from './enrichment';
+import { createEnrichmentOutput, EnrichmentOutput, EnrichmentOutputProps } from './enrichment';
 
 export enum Severity {
   normal = 'normal',
@@ -8,7 +8,8 @@ export enum Severity {
   critical = 'critical'
 }
 
-export interface AlertOutput extends EnrichmentOutput {
+export const alertTypeName = 'alert';
+export interface AlertOutput extends EnrichmentOutput<typeof alertTypeName> {
   node: string;
   severity: Severity;
   description: string;
@@ -28,7 +29,7 @@ export interface AlertOutputProps extends EnrichmentOutputProps {
 
 export function createAlertOutput(props: AlertOutputProps): AlertOutput {
   return {
-    ...createEnrichmentOutput(props, EnrichmentType.alert),
+    ...createEnrichmentOutput(props, alertTypeName),
     node: props.node,
     severity: props.severity,
     description: props.description,

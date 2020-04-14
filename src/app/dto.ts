@@ -5,13 +5,8 @@
  * This file holds the functions that translate the DTO to a `core` object (our entity).
  */
 
-import { AlertOutput, AlertOutputProps, createAlertOutput, Severity } from '../core/alert';
-import {
-  createHermeticityOutput,
-  HermeticityOutput,
-  HermeticityOutputProps,
-  HermeticityStatus
-} from '../core/hermeticity';
+import { alertTypeName, Severity } from '../core/alert';
+import { HermeticityStatus, hermeticityTypeName } from '../core/hermeticity';
 
 export interface EnrichmentReceived {
   /**
@@ -62,19 +57,20 @@ export interface AlertReceived extends EnrichmentReceived {
   operator: string;
 }
 
-export function ReceivedAlertToDomain(dto: AlertReceived): AlertOutput {
-  const props: AlertOutputProps = {
-    ...dto,
-    timestampCreated: dto.timestamp
-  };
-  return createAlertOutput(props);
+/**
+ * Mapping between the name of the enrichment received to the enrichment dto
+ */
+export interface TypeToEnrichmentReceived {
+  [alertTypeName]: AlertReceived;
+  [hermeticityTypeName]: HermeticityReceived;
 }
 
-export function ReceivedHermeticityToDomain(dto: HermeticityReceived): HermeticityOutput {
-  const props: HermeticityOutputProps = {
-    ...dto,
-    status: HermeticityStatus[dto.status] as keyof typeof HermeticityStatus,
-    timestampCreated: dto.timestamp
-  };
-  return createHermeticityOutput(props);
+export type TypeReceivedName = keyof TypeToEnrichmentReceived;
+
+/**
+ * Mapping between the name of the enrichment received to the name of the enrichment output
+ */
+export interface TypeReceivedToTypeOutputName {
+  [alertTypeName]: typeof alertTypeName;
+  [hermeticityTypeName]: typeof hermeticityTypeName;
 }

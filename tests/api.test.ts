@@ -1,3 +1,5 @@
+import { Response } from 'superagent';
+
 require('dotenv/config');
 import sinon, { SinonSandbox } from 'sinon';
 import { expect } from 'chai';
@@ -6,7 +8,7 @@ import app, { API_PREFIX_V1 } from '../src/server/server';
 import * as core from 'express-serve-static-core';
 import logger from '../src/logger';
 
-function postToApp(app: core.Express, path: string, data: object) {
+function postToApp(app: core.Express, path: string, data: object): Promise<Response> {
   return request(app)
     .post(`${API_PREFIX_V1}${path}`)
     .send(data);
