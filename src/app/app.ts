@@ -3,26 +3,18 @@
  */
 
 import { EnrichmentDispatcher } from '../core/enrichmentDispatcher';
-import { TypeToEnrichmentReceived, TypeReceivedName, TypeReceivedToTypeOutputName } from './dto';
-import { TypeToEnrichmentOutput } from '../core/types';
+import { TypeToEnrichmentReceived } from './dto';
+import { TypeToEnrichmentOutput, TypeName } from '../core/types';
 import { ReceivedAlertToDomain, ReceivedHermeticityToDomain } from './mapper';
 import { alertTypeName } from '../core/alert';
 import { hermeticityTypeName } from '../core/hermeticity';
-
-/**
- * Represents the enrichment output that is connected to the enrichment received by the
- * mapping of the names from `TypeReceivedToTypeOutputName`
- */
-type EnrichmentOutputByReceivedName<
-  T extends TypeReceivedName
-> = TypeToEnrichmentOutput[TypeReceivedToTypeOutputName[T]];
 
 /**
  * Represents the mapping from a certain type of received enrichment to the mapping function
  * that maps that received enrichment to the enrichment output it is connected to.
  */
 type TypeToMapper = {
-  [P in TypeReceivedName]: (dto: TypeToEnrichmentReceived[P]) => EnrichmentOutputByReceivedName<P>;
+  [P in TypeName]: (dto: TypeToEnrichmentReceived[P]) => TypeToEnrichmentOutput[P];
 };
 
 export const TypeToMapper: TypeToMapper = {
@@ -30,10 +22,7 @@ export const TypeToMapper: TypeToMapper = {
   [hermeticityTypeName]: ReceivedHermeticityToDomain
 };
 
-function enrichmentFactory<T extends TypeReceivedName>(
-  type: T,
-  msg: TypeToEnrichmentReceived[T]
-): EnrichmentOutputByReceivedName<T> {
+function enrichmentFactory<T extends TypeName>(type: T, msg: TypeToEnrichmentReceived[T]): TypeToEnrichmentOutput[T] {
   // unfortunately, we have to use `any` type here so that typescript will not throw any error,
   // reason being is that the compiler (ATM of writing this code) is not 'smart' enough to understand that
   // the type of the mapper function is narrowed, to the right type
@@ -41,7 +30,7 @@ function enrichmentFactory<T extends TypeReceivedName>(
   return mapper(msg);
 }
 
-export async function sendEnrichment<T extends TypeReceivedName>(
+export async function sendEnrichment<T extends TypeName>(
   type: T,
   msg: TypeToEnrichmentReceived[T],
   msgDispatcher: EnrichmentDispatcher

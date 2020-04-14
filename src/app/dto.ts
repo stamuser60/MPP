@@ -64,13 +64,3 @@ export interface TypeToEnrichmentReceived {
   [alertTypeName]: AlertReceived;
   [hermeticityTypeName]: HermeticityReceived;
 }
-
-export type TypeReceivedName = keyof TypeToEnrichmentReceived;
-
-/**
- * Mapping between the name of the enrichment received to the name of the enrichment output
- */
-export interface TypeReceivedToTypeOutputName {
-  [alertTypeName]: typeof alertTypeName;
-  [hermeticityTypeName]: typeof hermeticityTypeName;
-}

@@ -1,10 +1,11 @@
 import { createEnrichmentOutput, EnrichmentOutputProps } from '../src/core/enrichment';
 import { expect } from 'chai';
 
+const timestamp = '2020-03-25T12:24:23.319Z';
+
 describe('Core', function() {
   describe('Enrichment', function() {
     it('should create two different enrichments with same ID if same data is passed', function() {
-      const timestamp = '2020-03-25T12:24:23.319Z';
       const enrichmentProps: EnrichmentOutputProps = {
         origin: 'asd',
         timestampCreated: timestamp
@@ -14,7 +15,6 @@ describe('Core', function() {
       expect(enrichment1.ID === enrichment2.ID).to.eq(true);
     });
     it('should create two different enrichments with different ID if different data is passed', function() {
-      const timestamp = '2020-03-25T12:24:23.319Z';
       const enrichmentProps1: EnrichmentOutputProps = {
         origin: 'asd',
         timestampCreated: timestamp
@@ -28,18 +28,17 @@ describe('Core', function() {
       expect(enrichment1.ID === enrichment2.ID).to.eq(false);
     });
     it('should create object if props are fine', function() {
-      const timestamp = '2020-03-25T12:24:23.319Z';
       const enrichmentProps: EnrichmentOutputProps = {
         origin: 'asd',
         timestampCreated: timestamp
       };
       createEnrichmentOutput(enrichmentProps, 'alert');
     });
-    it('should throw exception when timestampCreated is older than timestampReceived', function(done) {
-      const timestamp = '2099-03-26T12:24:23.319Z';
+    it('should throw exception when timestampCreated is older than current time', function(done) {
+      const futureTimestamp = '2099-03-26T12:24:23.319Z';
       const enrichmentProps: EnrichmentOutputProps = {
         origin: 'asd',
-        timestampCreated: timestamp
+        timestampCreated: futureTimestamp
       };
       try {
         createEnrichmentOutput(enrichmentProps, 'alert');
