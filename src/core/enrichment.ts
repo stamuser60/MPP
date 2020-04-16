@@ -1,6 +1,7 @@
 import md5 from 'md5';
 
 export interface EnrichmentOutput<T extends string> {
+  timestampMPP: Date;
   timestampCreated: Date;
   origin: string;
   ID: string;
@@ -31,13 +32,14 @@ function generateMD5UniqueID(uniqueData: { [key: string]: any }): string {
 }
 
 export function createEnrichmentOutput<T extends string>(props: EnrichmentOutputProps, type: T): EnrichmentOutput<T> {
-  const timestampReceived = new Date();
+  const timestampNow = new Date();
   const timestampCreated = new Date(props.timestampCreated);
-  validate(timestampCreated, timestampReceived);
+  validate(timestampCreated, timestampNow);
   return {
     ID: generateMD5UniqueID(props),
     origin: props.origin,
     timestampCreated: timestampCreated,
+    timestampMPP: timestampNow,
     type: type
   };
 }
