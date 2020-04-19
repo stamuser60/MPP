@@ -7,10 +7,9 @@ import { validateEnrichment, validateEnrichmentType } from './validation';
 import { sendEnrichment } from '../app/app';
 import logger from '../logger';
 import { enrichmentDispatcher } from '../compositionRoot';
+import { AppError } from '../core/exc';
 
 const router = Router();
-
-// TODO: manage exceptions in a better way
 
 /**
  * @swagger
@@ -137,8 +136,10 @@ const router = Router();
  *      responses:
  *        200:
  *          description: send enrichment successfully
- *        400:
+ *        422:
  *          description: incorrect data was sent
+ *        503:
+ *          description: could not send the message to kafka
  */
 router.post('/enrichments/:type', async (req, res) => {
   try {
@@ -148,7 +149,11 @@ router.post('/enrichments/:type', async (req, res) => {
     await sendEnrichment(type, enrichment, enrichmentDispatcher);
     res.sendStatus(200);
   } catch (e) {
-    res.status(400).send(e.toString());
+    if (e instanceof AppError) {
+      res.status(e.status).send(e.toString());
+    } else {
+      res.status(400).send(e.toString());
+    }
     logger.error(`${e.message} \n ${e.stack}`);
   }
 });

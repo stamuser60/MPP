@@ -4,6 +4,7 @@ import { TypeToEnrichmentReceived } from '../app/dto';
 import { hermeticityTypeName } from '../core/hermeticity';
 import { alertTypeName } from '../core/alert';
 import { TypeName } from '../core/types';
+import { AppError } from '../core/exc';
 
 export const TypeToSchema: { [key in TypeName]: Schema } = {
   [hermeticityTypeName]: hermeticitySchema as Schema,
@@ -21,6 +22,10 @@ export function validateEnrichment<T extends TypeName>(type: T, msg: unknown): T
   const newNodeValidator = new Validator();
   const jsonSchemaOptions = { throwError: true };
   const schema = TypeToSchema[type];
-  newNodeValidator.validate(msg, schema, jsonSchemaOptions);
+  try {
+    newNodeValidator.validate(msg, schema, jsonSchemaOptions);
+  } catch (e) {
+    throw new AppError(e.toString(), 422);
+  }
   return msg as TypeToEnrichmentReceived[T];
 }

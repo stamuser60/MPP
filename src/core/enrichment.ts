@@ -1,4 +1,5 @@
 import md5 from 'md5';
+import { AppError } from './exc';
 
 export interface EnrichmentOutput<T extends string> {
   timestampMPP: Date;
@@ -15,8 +16,9 @@ export interface EnrichmentOutputProps {
 
 function validate(tsCreated: Date, tsReceived: Date): void {
   if (tsReceived < tsCreated) {
-    throw Error(
-      `'timestampCreated' cannot be future, got ${tsCreated} as 'timestampCreated' while ${tsCreated} is the current time`
+    throw new AppError(
+      `'timestampCreated' cannot be future, got ${tsCreated} as 'timestampCreated' while ${tsCreated} is the current time`,
+      422
     );
   }
 }
