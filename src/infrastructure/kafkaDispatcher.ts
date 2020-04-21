@@ -23,13 +23,13 @@ export class KafkaEnrichmentDispatcher implements EnrichmentDispatcher {
     this.topicName = topicName;
   }
 
-  async send(enrichment: EnrichmentOutput<TypeName>): Promise<void> {
+  async send(enrichments: EnrichmentOutput<TypeName>[]): Promise<void> {
     return RetryablePromise.retry(SEND_RETRY_NUMBER, (resolve, reject) => {
       this.producer.send(
         [
           {
             topic: this.topicName,
-            messages: JSON.stringify(enrichment)
+            messages: JSON.stringify(enrichments)
           }
         ],
         function(err, data) {

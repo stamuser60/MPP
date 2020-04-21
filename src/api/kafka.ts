@@ -1,5 +1,5 @@
 import { Message } from 'kafka-node';
-import { validateEnrichment } from './validation';
+import { validateEnrichmentsReceived } from './validation';
 import { sendEnrichment } from '../app/app';
 import { enrichmentConsumer, enrichmentDispatcher } from '../compositionRoot';
 import logger from '../logger';
@@ -18,20 +18,20 @@ const RETRY_WAIT_INTERVAL_MS = 3000;
  * an error that is an instance of `DispatchError`, reason being is that if the problem is that the
  * kafka is down, then we want to continue to try and sending the message until we succeed.
  * @param type: type of the enrichment
- * @param enrichment: the enrichment document itself
+ * @param enrichments: list of hermeticity enrichment documents
  * @param enrichmentDispatcher: the dispatcher object which performs the sending of the enrichment
  */
 async function sendUntilSuccess(
   type: TypeName,
-  enrichment: HermeticityReceived,
+  enrichments: HermeticityReceived[],
   enrichmentDispatcher: EnrichmentDispatcher
 ): Promise<void> {
   try {
-    await sendEnrichment(hermeticityTypeName, enrichment, enrichmentDispatcher);
+    await sendEnrichment(hermeticityTypeName, enrichments, enrichmentDispatcher);
   } catch (e) {
     if (e instanceof DispatchError) {
       await wait(RETRY_WAIT_INTERVAL_MS);
-      await sendUntilSuccess(type, enrichment, enrichmentDispatcher);
+      await sendUntilSuccess(type, enrichments, enrichmentDispatcher);
     } else {
       throw e;
     }
@@ -40,9 +40,9 @@ async function sendUntilSuccess(
 
 async function onMessage(message: Message): Promise<void> {
   try {
-    const messageObj = JSON.parse(message.value.toString());
-    const enrichment = validateEnrichment(hermeticityTypeName, messageObj);
-    await sendUntilSuccess(hermeticityTypeName, enrichment, enrichmentDispatcher);
+    const messageValue = JSON.parse(message.value.toString());
+    const enrichments = validateEnrichmentsReceived(hermeticityTypeName, messageValue);
+    await sendUntilSuccess(hermeticityTypeName, enrichments, enrichmentDispatcher);
   } catch (e) {
     logger.error(`while processing message from unity's kafka \n ${e.stack}`);
     throw e;

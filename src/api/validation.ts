@@ -18,14 +18,43 @@ export function validateEnrichmentType(type: string): TypeName {
   return type as TypeName;
 }
 
-export function validateEnrichment<T extends TypeName>(type: T, msg: unknown): TypeToEnrichmentReceived[T] {
-  const newNodeValidator = new Validator();
-  const jsonSchemaOptions = { throwError: true };
+const schemaValidator = new Validator();
+const jsonSchemaOptions = { throwError: true };
+
+function validateSingleEnrichment<T extends TypeName>(type: T, msg: unknown): TypeToEnrichmentReceived[T] {
   const schema = TypeToSchema[type];
   try {
-    newNodeValidator.validate(msg, schema, jsonSchemaOptions);
+    schemaValidator.validate(msg, schema, jsonSchemaOptions);
   } catch (e) {
     throw new AppError(e.toString(), 422);
   }
   return msg as TypeToEnrichmentReceived[T];
+}
+
+function validateMultipleEnrichments<T extends TypeName>(type: T, msgs: unknown[]): TypeToEnrichmentReceived[T][] {
+  const schema = TypeToSchema[type];
+  return msgs.map(function(msg, index) {
+    try {
+      schemaValidator.validate(msg, schema, jsonSchemaOptions);
+      return msg as TypeToEnrichmentReceived[T];
+    } catch (e) {
+      if (msgs.length === 1) {
+        throw new AppError(e.toString(), 422);
+      }
+      throw new AppError(`The ${index + 1}'s document is problematic: ${e.toString()}`, 422);
+    }
+  });
+}
+
+export function validateEnrichmentsReceived<T extends TypeName>(
+  type: T,
+  value: object | object[]
+): TypeToEnrichmentReceived[T][] {
+  let enrichmentsReceived;
+  if (Array.isArray(value)) {
+    enrichmentsReceived = validateMultipleEnrichments(type, value);
+  } else {
+    enrichmentsReceived = [validateSingleEnrichment(type, value)];
+  }
+  return enrichmentsReceived;
 }

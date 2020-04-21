@@ -32,9 +32,11 @@ function enrichmentFactory<T extends TypeName>(type: T, msg: TypeToEnrichmentRec
 
 export async function sendEnrichment<T extends TypeName>(
   type: T,
-  msg: TypeToEnrichmentReceived[T],
+  enrichmentsReceived: TypeToEnrichmentReceived[T][],
   msgDispatcher: EnrichmentDispatcher
 ): Promise<void> {
-  const enrichment = enrichmentFactory(type, msg);
-  await msgDispatcher.send(enrichment);
+  const enrichments = enrichmentsReceived.map(enrichmentReceived => {
+    return enrichmentFactory(type, enrichmentReceived);
+  });
+  await msgDispatcher.send(enrichments);
 }

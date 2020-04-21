@@ -3,7 +3,7 @@
  */
 
 import { Router } from 'express';
-import { validateEnrichment, validateEnrichmentType } from './validation';
+import { validateEnrichmentsReceived, validateEnrichmentType } from './validation';
 import { sendEnrichment } from '../app/app';
 import logger from '../logger';
 import { enrichmentDispatcher } from '../compositionRoot';
@@ -111,6 +111,12 @@ const router = Router();
  *              oneOf:
  *                - $ref: '#/components/schemas/Alert'
  *                - $ref: '#/components/schemas/Hermeticity'
+ *                - type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/Alert'
+ *                - type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/Hermeticity'
  *            examples:
  *              alert:
  *                summary: An example of alert doc
@@ -145,8 +151,8 @@ router.post('/enrichments/:type', async (req, res) => {
   try {
     const typeStr = req.params.type;
     const type = validateEnrichmentType(typeStr);
-    const enrichment = validateEnrichment(type, req.body);
-    await sendEnrichment(type, enrichment, enrichmentDispatcher);
+    const enrichmentsReceived = validateEnrichmentsReceived(type, req.body);
+    await sendEnrichment(type, enrichmentsReceived, enrichmentDispatcher);
     res.sendStatus(200);
   } catch (e) {
     if (e instanceof AppError) {
@@ -157,7 +163,5 @@ router.post('/enrichments/:type', async (req, res) => {
     logger.error(`${e.message} \n ${e.stack}`);
   }
 });
-
-//TODO: check about making the api and all the rest of the components to be able to handle bulk operatio
 
 export default router;
