@@ -32,11 +32,11 @@ export class KafkaEnrichmentConsumer {
    *                   If the function throws an error, the message that was passed to the function will be
    *                   send to the DLQ.
    */
-  start(onMessage: (message: Message) => Promise<void>): void {
+  start(onMessage: (message: object | object[]) => Promise<void>): void {
     this.consumer.on('data', async (msg: Message) => {
       this.consumer.pause();
       try {
-        await onMessage(msg);
+        await onMessage(JSON.parse(msg.value.toString()));
         this.consumer.commit(msg, false, this._commitCB);
       } catch (e) {
         await this.sendToDLQ(msg);

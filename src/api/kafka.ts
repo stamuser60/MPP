@@ -1,4 +1,3 @@
-import { Message } from 'kafka-node';
 import { validateEnrichmentsReceived } from './validation';
 import { sendEnrichment } from '../app/app';
 import { enrichmentConsumer, enrichmentDispatcher } from '../compositionRoot';
@@ -38,10 +37,9 @@ async function sendUntilSuccess(
   }
 }
 
-async function onMessage(message: Message): Promise<void> {
+async function onMessage(value: object | object[]): Promise<void> {
   try {
-    const messageValue = JSON.parse(message.value.toString());
-    const enrichments = validateEnrichmentsReceived(hermeticityTypeName, messageValue);
+    const enrichments = validateEnrichmentsReceived(hermeticityTypeName, value);
     await sendUntilSuccess(hermeticityTypeName, enrichments, enrichmentDispatcher);
   } catch (e) {
     logger.error(`while processing message from unity's kafka \n ${e.stack}`);

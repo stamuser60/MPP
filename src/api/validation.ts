@@ -56,5 +56,5 @@ export function validateEnrichmentsReceived<T extends TypeName>(
   } else {
     enrichmentsReceived = [validateSingleEnrichment(type, value)];
   }
-  return enrichmentsReceived;
+  return enrichmentsReceived as TypeToEnrichmentReceived[T][];
 }
