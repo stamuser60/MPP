@@ -1,4 +1,4 @@
-import md5 from 'md5';
+import { v1 as uuidv1 } from 'uuid';
 import { AppError } from './exc';
 
 export interface EnrichmentOutput<T extends string> {
@@ -23,22 +23,12 @@ function validate(tsCreated: Date, tsReceived: Date): void {
   }
 }
 
-/**
- * A function that generates a unique hash based on json passed.
- * @param uniqueData: The data we use to generate the MD5 hash.
- *                    Another place where we have to use `any` because the typescript compiler
- *                    is not able to tell that we are passing sufficient data.
- */
-function generateMD5UniqueID(uniqueData: { [key: string]: any }): string {
-  return md5(JSON.stringify(uniqueData));
-}
-
 export function createEnrichmentOutput<T extends string>(props: EnrichmentOutputProps, type: T): EnrichmentOutput<T> {
   const timestampNow = new Date();
   const timestampCreated = new Date(props.timestampCreated);
   validate(timestampCreated, timestampNow);
   return {
-    ID: generateMD5UniqueID(props),
+    ID: uuidv1(),
     origin: props.origin,
     timestampCreated: timestampCreated,
     timestampMPP: timestampNow,
