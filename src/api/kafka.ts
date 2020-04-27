@@ -7,11 +7,11 @@ import { HermeticityReceived } from '../app/dto';
 import { TypeName } from '../core/types';
 import { DispatchError } from '../core/exc';
 import { EnrichmentDispatcher } from '../core/enrichmentDispatcher';
+import { UNITY_KAFKA_RETRY_DISPATCH_WAIT_INTERVAL_MS } from '../config';
 
 function wait(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(() => resolve(), ms));
 }
-const RETRY_WAIT_INTERVAL_MS = 3000;
 /**
  * A function that calls the `sendEnrichment` repeatedly until it succeeds or doesn't receive
  * an error that is an instance of `DispatchError`, reason being is that if the problem is that the
@@ -29,7 +29,7 @@ async function sendUntilSuccess(
     await sendEnrichment(hermeticityTypeName, enrichments, enrichmentDispatcher);
   } catch (e) {
     if (e instanceof DispatchError) {
-      await wait(RETRY_WAIT_INTERVAL_MS);
+      await wait(UNITY_KAFKA_RETRY_DISPATCH_WAIT_INTERVAL_MS);
       await sendUntilSuccess(type, enrichments, enrichmentDispatcher);
     } else {
       throw e;
@@ -37,7 +37,7 @@ async function sendUntilSuccess(
   }
 }
 
-async function onMessage(value: object | object[]): Promise<void> {
+export async function onMessage(value: object | object[]): Promise<void> {
   try {
     const enrichments = validateEnrichmentsReceived(hermeticityTypeName, value);
     await sendUntilSuccess(hermeticityTypeName, enrichments, enrichmentDispatcher);

@@ -13,7 +13,10 @@ export const TypeToSchema: { [key in TypeName]: Schema } = {
 
 export function validateEnrichmentType(type: string): TypeName {
   if (!Object.keys(TypeToSchema).some(value => value === type)) {
-    throw Error(`Enrichment type ${type} was not found, options are: ${Object.keys(TypeToSchema).join(', ')}`);
+    throw new AppError(
+      `Enrichment type ${type} was not found, options are: ${Object.keys(TypeToSchema).join(', ')}`,
+      404
+    );
   }
   return type as TypeName;
 }

@@ -146,6 +146,10 @@ const router = Router();
  *          description: incorrect data was sent
  *        503:
  *          description: could not send the message to kafka
+ *        404:
+ *          description: type not found
+ *        500:
+ *          description: internal server error
  */
 router.post('/enrichments/:type', async (req, res) => {
   try {
@@ -158,7 +162,7 @@ router.post('/enrichments/:type', async (req, res) => {
     if (e instanceof AppError) {
       res.status(e.status).send(e.toString());
     } else {
-      res.status(400).send(e.toString());
+      res.status(500).send(e.toString());
     }
     logger.error(`${e.message} \n ${e.stack}`);
   }

@@ -5,7 +5,7 @@
 import { EnrichmentDispatcher } from '../core/enrichmentDispatcher';
 import { TypeToEnrichmentReceived } from './dto';
 import { TypeToEnrichmentOutput, TypeName } from '../core/types';
-import { ReceivedAlertToDomain, ReceivedHermeticityToDomain } from './mapper';
+import { receivedAlertToDomain, receivedHermeticityToDomain } from './mapper';
 import { alertTypeName } from '../core/alert';
 import { hermeticityTypeName } from '../core/hermeticity';
 
@@ -17,9 +17,9 @@ type TypeToMapper = {
   [P in TypeName]: (dto: TypeToEnrichmentReceived[P]) => TypeToEnrichmentOutput[P];
 };
 
-export const TypeToMapper: TypeToMapper = {
-  [alertTypeName]: ReceivedAlertToDomain,
-  [hermeticityTypeName]: ReceivedHermeticityToDomain
+const TypeToMapper: TypeToMapper = {
+  [alertTypeName]: receivedAlertToDomain,
+  [hermeticityTypeName]: receivedHermeticityToDomain
 };
 
 function enrichmentFactory<T extends TypeName>(type: T, msg: TypeToEnrichmentReceived[T]): TypeToEnrichmentOutput[T] {

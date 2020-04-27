@@ -7,7 +7,7 @@ import {
   HermeticityStatus
 } from '../core/hermeticity';
 
-export function ReceivedAlertToDomain(dto: AlertReceived): AlertOutput {
+export function receivedAlertToDomain(dto: AlertReceived): AlertOutput {
   const props: AlertOutputProps = {
     ...dto,
     timestampCreated: dto.timestamp
@@ -15,7 +15,7 @@ export function ReceivedAlertToDomain(dto: AlertReceived): AlertOutput {
   return createAlertOutput(props);
 }
 
-export function ReceivedHermeticityToDomain(dto: HermeticityReceived): HermeticityOutput {
+export function receivedHermeticityToDomain(dto: HermeticityReceived): HermeticityOutput {
   const props: HermeticityOutputProps = {
     ...dto,
     status: HermeticityStatus[dto.status] as keyof typeof HermeticityStatus,
