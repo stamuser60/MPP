@@ -10,6 +10,7 @@ function getEnv(name: string, defaultValue?: string): string {
   return env;
 }
 
+export const CPR_LOG_LEVEL = getEnv('CPR_LOG_LEVEL', 'info');
 export const CPR_KAFKA_CONN = getEnv('CPR_KAFKA_CONN');
 export const CPR_KAFKA_TOPIC = getEnv('CPR_KAFKA_TOPIC');
 export const UNITY_KAFKA_CONN = getEnv('UNITY_KAFKA_CONN');

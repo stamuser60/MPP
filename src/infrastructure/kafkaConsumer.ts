@@ -3,10 +3,6 @@ import { EnrichmentDispatcher } from '../core/enrichmentDispatcher';
 import { UNITY_KAFKA_CONN, UNITY_KAFKA_GROUP_ID } from '../config';
 import { CprLogger } from '@stamscope/jslogger';
 
-// TODO: finish writing `sendToDLQ`
-// TODO: finish writing `_commitCB`
-// TODO: make sure the logic on `start` works as expected.
-
 export class KafkaEnrichmentConsumer {
   /**
    * We use `ConsumerGroupStream` here so we will be able to control more precisely the commits,
@@ -53,6 +49,7 @@ export class KafkaEnrichmentConsumer {
   }
 
   _commitCB(error: Error): void {
+    // TODO: what do we do if there is an error when committing?
     if (error) {
       this.logger.error(`${this.name} kafka - commit cb error`);
       throw error;
@@ -60,6 +57,7 @@ export class KafkaEnrichmentConsumer {
   }
 
   async sendToDLQ(msg: Message): Promise<void> {
+    // TODO: what do we do with the DLQ logic?
     this.logger.error(`${this.name} kafka - disposed of ${msg} `);
     this.consumer.commit(msg, false, this._commitCB);
   }

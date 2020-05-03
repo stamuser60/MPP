@@ -1,12 +1,42 @@
+import { Schema, Validator } from 'jsonschema';
+
 require('dotenv/config');
+import { CprLogger } from '@stamscope/jslogger';
 import sinon, { SinonSandbox } from 'sinon';
 import { expect } from 'chai';
-import { Readable } from 'stream';
+import { Readable, ReadableOptions } from 'stream';
 import logger from '../src/logger';
 import { ConsumerGroupStream, Message, Producer } from 'kafka-node';
 import { KafkaEnrichmentDispatcher } from '../src/infrastructure/kafkaDispatcher';
 import { KafkaEnrichmentConsumer } from '../src/infrastructure/kafkaConsumer';
 import { EnrichmentOutput } from '../src/core/enrichment';
+import { alertSchema, hermeticitySchema } from '../src/infrastructure/schemaGenerator';
+import {
+  alertReceived,
+  hermeticityReceived,
+  invalidStructureAlertReceived,
+  invalidStructureHermeticityReceived
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+} from './config';
+
+/**
+ * A class to create test readable streams,
+ * by default it wont destroy itself.
+ */
+class TestStream extends Readable {
+  constructor(opt?: ReadableOptions) {
+    if (opt) {
+      super(opt);
+    } else {
+      super({ autoDestroy: false });
+    }
+  }
+
+  _read(): void {
+    return;
+  }
+}
 
 const msg: Message = {
   topic: 'test',
@@ -15,49 +45,43 @@ const msg: Message = {
 
 describe('Infrastructure', function() {
   const sandbox: SinonSandbox = sinon.createSandbox();
-  let dispatcher: KafkaEnrichmentDispatcher;
-  let consumer: KafkaEnrichmentConsumer;
+  let stubbedLogger: CprLogger;
+  let kafkaEnrichmentDispatcher: KafkaEnrichmentDispatcher;
+  let kafkaConsumer: KafkaEnrichmentConsumer;
   let dlqDispatcher: KafkaEnrichmentDispatcher;
   let kafkaProducer: Producer;
   let kafkaDlqProducer: Producer;
-  let kafkaConsumer: ConsumerGroupStream;
+  let consumerGroupStream: ConsumerGroupStream;
   let onMessageCallback: (message: object | object[]) => Promise<void>;
+
+  let schemaValidator: Validator;
+  const jsonSchemaOptions = { throwError: true };
 
   beforeEach(function() {
     // disable logging
-    sandbox.stub(logger);
-
-    kafkaProducer = {} as Producer;
-    kafkaProducer.send = sandbox.stub();
-    (kafkaProducer.send as any).callsFake((payloads: any, cb: any) => cb());
-
-    dispatcher = new KafkaEnrichmentDispatcher('test', kafkaProducer, 'test', logger);
-
-    kafkaConsumer = new Readable() as ConsumerGroupStream;
-    kafkaConsumer.read = sandbox.stub();
-    kafkaConsumer.commit = sandbox.stub();
-
-    kafkaDlqProducer = {} as Producer;
-    kafkaDlqProducer.send = sandbox.stub();
-    (kafkaDlqProducer.send as any).callsFake((payloads: any, cb: any) => cb());
-
-    dlqDispatcher = new KafkaEnrichmentDispatcher('test', kafkaProducer, 'test', logger);
-
-    consumer = new KafkaEnrichmentConsumer('test', kafkaConsumer, dlqDispatcher, logger);
+    stubbedLogger = (sandbox.stub(logger) as unknown) as CprLogger;
   });
+
   afterEach(function() {
     sandbox.restore();
   });
 
   describe('KafkaEnrichmentDispatcher', function() {
+    beforeEach(function() {
+      kafkaProducer = {} as Producer;
+      kafkaProducer.send = sandbox.stub();
+      (kafkaProducer.send as any).callsFake((payloads: any, cb: any) => cb());
+
+      kafkaEnrichmentDispatcher = new KafkaEnrichmentDispatcher('test', kafkaProducer, 'test', stubbedLogger);
+    });
     it('should call send function on producer passed to it', async function() {
-      await dispatcher.send([{} as EnrichmentOutput<'alert'>]);
+      await kafkaEnrichmentDispatcher.send([{} as EnrichmentOutput<'alert'>]);
       expect((kafkaProducer.send as any).calledOnce).to.be.true;
     });
     it('should retry `send` function 2 times before rethrowing the error', async function() {
       (kafkaProducer as any).send.throws();
       try {
-        await dispatcher.send([{} as EnrichmentOutput<'alert'>]);
+        await kafkaEnrichmentDispatcher.send([{} as EnrichmentOutput<'alert'>]);
       } catch (e) {
         expect((kafkaProducer.send as any).callCount).to.be.eq(3);
         return;
@@ -65,21 +89,92 @@ describe('Infrastructure', function() {
       throw Error('No exception thrown');
     });
   });
-  // TODO: the unit testing of the consumer is stuck.
-  // reason being is that when we set a listener on any event in the `kafkaConsumer` readable stream,
-  // it gets stuck. The test gets stuck because it is waiting for the stream to close all of its related resources.
-  // It looks like even when calling `destroy` and `removeAllListeners` it wont be enough for mocha to realize that
-  // there is no more resources to clean.
-  // Need to find a way to perform the tests on the stream and being able to finish the test afterwards.
-  // There is an option to just call the mocha tests with --exit flag, but it does'nt feel right solution...
-  // describe('KafkaEnrichmentConsumer', function() {
-  //   it('should subscribe to data event', function() {
-  //     onMessageCallback = sandbox.stub();
-  //     kafkaConsumer.on('data', function(data) {
-  //       console.log(data);
-  //     })
-  //     // consumer.start(onMessageCallback);
-  //     expect(kafkaConsumer.listenerCount('data')).to.be.eq(1);
-  //   });
-  // });
+  describe('KafkaEnrichmentConsumer', function() {
+    beforeEach(function() {
+      kafkaDlqProducer = {} as Producer;
+      kafkaDlqProducer.send = sandbox.stub();
+      (kafkaDlqProducer.send as any).callsFake((payloads: any, cb: any) => cb());
+
+      dlqDispatcher = new KafkaEnrichmentDispatcher('test', kafkaProducer, 'test', stubbedLogger);
+
+      consumerGroupStream = (new TestStream() as unknown) as ConsumerGroupStream;
+      consumerGroupStream.commit = sandbox.stub();
+      kafkaConsumer = new KafkaEnrichmentConsumer('test', consumerGroupStream, dlqDispatcher, stubbedLogger);
+
+      onMessageCallback = sandbox.stub();
+      kafkaConsumer.start(onMessageCallback);
+    });
+    afterEach(function() {
+      consumerGroupStream.destroy();
+    });
+
+    it('should subscribe to `data` event', function() {
+      expect(consumerGroupStream.listenerCount('data')).to.be.eq(1);
+    });
+    it('should call `onMessage` function when `data` event emitted', function() {
+      consumerGroupStream.emit('data', msg);
+      expect((onMessageCallback as any).calledOnce).to.be.true;
+    });
+    it('should pass parsed value of the kafka message object to the `onMessage` function', function() {
+      consumerGroupStream.emit('data', msg);
+      const parsedMsgValue = JSON.parse(msg.value as string);
+      const parsedMsgValueStringified = JSON.stringify(parsedMsgValue);
+      const parsedValuedStringified = JSON.stringify((onMessageCallback as any).getCall(0).args[0]);
+      expect(parsedMsgValueStringified).to.be.eq(parsedValuedStringified);
+    });
+    it('should send to DLQ if value emitted on `data` event is not json', function() {
+      const spy = sinon.spy(kafkaConsumer, 'sendToDLQ');
+      consumerGroupStream.emit('data', 'test');
+      expect(spy.calledOnce).to.be.true;
+    });
+    it('should commit msg received if `onMessage` did not throw error', function() {
+      consumerGroupStream.emit('data', msg);
+      // setTimeout here is because there is async behaviour which we need to wait for to happen
+      setTimeout(() => {
+        expect((consumerGroupStream as any).commit.calledOnce).to.be.true;
+      }, 1000);
+    });
+    it('should when data is problematic (not json) it should call sendToDLQ, then commit, then resume', function() {
+      const spySendToDLQ = sinon.spy(kafkaConsumer, 'sendToDLQ');
+      const spyResume = sinon.spy(consumerGroupStream, 'resume');
+      consumerGroupStream.emit('data', 'not json!');
+      setTimeout(() => {
+        expect((consumerGroupStream.commit as any).calledAfter(spySendToDLQ)).to.be.true;
+        expect(spyResume.calledAfter(consumerGroupStream.commit as any)).to.be.true;
+      }, 1000);
+    });
+  });
+  describe('schemaGenerator', function() {
+    beforeEach(function() {
+      schemaValidator = new Validator();
+    });
+    describe('alert schema', function() {
+      it('should not throw any error if passed alert received', function() {
+        schemaValidator.validate(alertReceived, alertSchema as Schema, jsonSchemaOptions);
+      });
+      it('should throw error data passed is not compliant with `AlertReceived` interface', function(done) {
+        try {
+          schemaValidator.validate(invalidStructureAlertReceived, alertSchema as Schema, jsonSchemaOptions);
+        } catch (e) {
+          done();
+          return;
+        }
+        done('No error thrown');
+      });
+    });
+    describe('hermeticity schema', function() {
+      it('should not throw any error if passed hermeticity received', function() {
+        schemaValidator.validate(hermeticityReceived, hermeticitySchema as Schema, jsonSchemaOptions);
+      });
+      it('should throw error data passed is not compliant with `HermeticityReceived` interface', function(done) {
+        try {
+          schemaValidator.validate(invalidStructureHermeticityReceived, hermeticitySchema as Schema, jsonSchemaOptions);
+        } catch (e) {
+          done();
+          return;
+        }
+        done('No error thrown');
+      });
+    });
+  });
 });
