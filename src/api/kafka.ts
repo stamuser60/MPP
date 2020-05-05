@@ -37,8 +37,20 @@ async function sendUntilSuccess(
   }
 }
 
+function addUnityOrigin(value: object | object[]): object | object[] {
+  if (Array.isArray(value)) {
+    for (const doc of value) {
+      (doc as any)['origin'] = 'unityPrometheus';
+    }
+  } else {
+    (value as any)['origin'] = 'unityPrometheus';
+  }
+  return value;
+}
+
 export async function onMessage(value: object | object[]): Promise<void> {
   try {
+    value = addUnityOrigin(value);
     const enrichments = validateEnrichmentsReceived(hermeticityTypeName, value);
     await sendUntilSuccess(hermeticityTypeName, enrichments, enrichmentDispatcher);
   } catch (e) {
