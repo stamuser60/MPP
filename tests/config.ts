@@ -67,3 +67,19 @@ export const invalidStructureHermeticityReceived = {
   hasAlert: false,
   status: 2
 };
+export const originLessHermeticityReceived = {
+  timestamp: timestamp,
+  value: 23,
+  status: 1,
+  hasAlert: false,
+  beakID: 'sdf'
+};
+export const originLessAlertReceived = {
+  timestamp: timestamp,
+  severity: Severity.critical,
+  operator: 'asd',
+  object: 'sdf',
+  node: 'asd',
+  description: 'asd',
+  application: 'asd'
+};

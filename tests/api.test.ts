@@ -11,6 +11,8 @@ import { enrichmentDispatcher } from '../src/compositionRoot';
 import {
   alertReceived,
   hermeticityReceived,
+  originLessAlertReceived,
+  originLessHermeticityReceived,
   invalidStructureAlertReceived,
   invalidStructureHermeticityReceived
   // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
@@ -97,7 +99,7 @@ describe('api', function() {
           .throws(new DispatchError('test error', 500))
           .onSecondCall()
           .throws(new DispatchError('test error', 500));
-        await onMessage(hermeticityReceived);
+        await onMessage(originLessHermeticityReceived);
         expect((dispatcher as any).send.calledThrice).to.be.true;
       });
       it('should propagate error if its not `DispatchError`', async function() {
@@ -107,12 +109,17 @@ describe('api', function() {
           .onSecondCall()
           .throws(new AppError('not dispatch', 500));
         try {
-          await onMessage(hermeticityReceived);
+          await onMessage(originLessAlertReceived);
         } catch (e) {
           expect(e instanceof AppError).to.be.true;
           return;
         }
         throw new Error('Not error thrown');
+      });
+      it('should add origin key to a single document arriving to `onMessage`', async function() {
+        await onMessage(originLessHermeticityReceived);
+        const args = (dispatcher.send as any).getCall(0).args[0];
+        expect(args[0].origin).to.be.eq('unityPrometheus');
       });
     });
   });
